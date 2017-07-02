@@ -1,6 +1,6 @@
 {
   "name": "@srvem/app",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Core package for srvem (pronounced \"serve 'em\"), a super-fast and minimalist TypeScript middleware-oriented server framework for Node.js.",
   "main": "build/main.js",
   "typings": "build/main.d.ts",
