@@ -1,0 +1,36 @@
+{
+  "name": "@srvem/app",
+  "version": "0.0.0",
+  "description": "Core package for srvem (pronounced \"serve 'em\"), a super-fast and minimalist TypeScript middleware-oriented server framework for Node.js",
+  "main": "build/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srvem/app.git"
+  },
+  "keywords": [
+    "core",
+    "srvem",
+    "app",
+    "serve",
+    "server",
+    "super",
+    "fast",
+    "high",
+    "performance",
+    "minimal",
+    "minimalist",
+    "typescript",
+    "middleware",
+    "framework",
+    "http"
+  ],
+  "author": "Kaleab S. Melkie <kaleabmelkie@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/srvem/app/issues"
+  },
+  "homepage": "https://github.com/srvem/app#readme"
+}
