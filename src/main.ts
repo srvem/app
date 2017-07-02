@@ -1,4 +1,1 @@
-import { Srvem } from './Srvem'
-
-export { Srvem }
-export default { Srvem }
+export { Srvem } from './Srvem'

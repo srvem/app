@@ -1,40 +1,57 @@
 # @srvem/app
-Core package for srvem (pronounced "serve 'em"), a super-fast and minimalist TypeScript middleware-oriented server framework for Node.js.
-
-# Installation
+  
+## Introduction
+Srvem (pronounced "serve 'em") is a super-fast and minimalist TypeScript middleware-oriented server for Node.js. This is the core package of the framework.
+  
+## Installation
 > `npm install --save @srvem/app`
-
-# Usage
+  
+## Usage
 ```typescript
 import { Srvem } from '@srvem/app'
 
 const app = new Srvem()
 
-// middlewares can go here using app.use()
+// app.use( middleware1 )
+// app.use( middleware2, middleware3 ) // ...
+// app.handle( handlerFuncion4 )
+// app.handle( handler5, handler6, handler7 ) // ...
 
 app.start().listen(80)
 
 ```
-
-# Public API
+    
+## Public API
 ```typescript
 class Srvem {
 
   // SrvMiddleware is from the '@srvem/middleware' module
   // it is a blueprint (super and abstract class) for all other srvem middlewares
-  use(middleware: SrvMiddleware): void
+  use(...middleware: SrvMiddleware[]): void
+
+  // handlers are middleware functions called when a request is recieved
+  handle(...handlers: ((request: IncomingMessage, response: ServerResponse) => void)[]): void
 
   // returns a Server from the built-in Node.js 'http' module
   // the listen method can be called on Server
   start(): Server
 
+  // Server from Node.js' 'http' module
+  // returns null if start() hasn't been called yet
+  server: Server
+
 }
 
 ```
-
-# Credits
+  
+## See Also
+- [@srvem/static](https://github.com/srvem/static) to serve static files from a specified directory.
+- [@srvem/router](https://github.com/srvem/router) to develop routers and server APIs.
+- [@srvem/middleware](https://github.com/srvem/static) to create your own custom middleware for Srvem apps.
+  
+## Credits
 Kaleab S. Melkie (<kaleabmelkie@gmail.com>)
-
-# License
+  
+## License
 MIT License
 Copyright (c) 2017 srvem

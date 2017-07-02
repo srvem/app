@@ -4,6 +4,7 @@
     "outDir": "build",
     "module": "commonjs",
     "moduleResolution": "node",
+    "removeComments": true,
     "rootDir": "src",
     "target": "es5",
     "sourceMap": true

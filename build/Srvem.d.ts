@@ -1,10 +1,11 @@
 /// <reference types="node" />
 import { SrvMiddleware } from '@srvem/middleware';
-import { Server } from 'http';
+import { IncomingMessage, Server, ServerResponse } from 'http';
 export declare class Srvem {
     private middleware;
     server: Server;
-    use(middleware: SrvMiddleware): void;
-    private callback();
+    constructor();
+    use(...middleware: SrvMiddleware[]): void;
+    handle(...handlers: ((request: IncomingMessage, response: ServerResponse) => void)[]): void;
     start(): Server;
 }
