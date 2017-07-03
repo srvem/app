@@ -1,12 +1,13 @@
 {
   "name": "@srvem/app",
   "version": "0.2.0",
-  "description": "Core package for srvem (pronounced \"serve 'em\"), a super-fast and minimalist TypeScript middleware-oriented server framework for Node.js.",
+  "description": "Core package for srvem (pronounced \"serve 'em\"), a super-fast and minimalist middleware-oriented TypeScript server framework for Node.js.",
   "main": "build/main.js",
   "typings": "build/main.d.ts",
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc -w",
+    "start": "npm run build && node ./",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

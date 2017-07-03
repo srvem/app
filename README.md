@@ -1,7 +1,5 @@
 # @srvem/app
-  
-## Introduction
-Srvem (pronounced "serve 'em") is a super-fast and minimalist TypeScript middleware-oriented server for Node.js. This is the core package of the framework.
+Srvem (pronounced "serve 'em") is a super-fast and minimalist middleware-oriented TypeScript server for Node.js. This is the core package of the framework.
   
 ## Installation
 > `npm install --save @srvem/app`
@@ -30,7 +28,7 @@ class Srvem {
   use(...middleware: SrvMiddleware[]): void
 
   // handlers are middleware functions called when a request is recieved
-  handle(...handlers: ((request: IncomingMessage, response: ServerResponse) => void)[]): void
+  handle(...handlers: ((request: SrvRequest, response: SrvResponse) => void)[]): void
 
   // returns a Server from the built-in Node.js 'http' module
   // the listen method can be called on Server
@@ -53,5 +51,5 @@ class Srvem {
 Kaleab S. Melkie (<kaleabmelkie@gmail.com>)
   
 ## License
-MIT License
-Copyright (c) 2017 srvem
+MIT License  
+Copyright &copy; 2017 srvem

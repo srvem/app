@@ -1,5 +1,5 @@
-import { SrvMiddleware } from '@srvem/middleware'
-import { createServer, IncomingMessage, Server, ServerResponse } from 'http'
+import { SrvMiddleware, SrvRequest, SrvResponse } from '@srvem/middleware'
+import { createServer, Server } from 'http'
 
 /**
  * `Srvem` (pronounced "serve 'em") is a super-fast and minimalist
@@ -32,7 +32,7 @@ export class Srvem {
    * whenever the Srvem server recieves a request.
    * @param middleware Srvem middleware(s)
    */
-  use(...middleware: SrvMiddleware[]) {
+  use(...middleware: SrvMiddleware[]): void {
     for (const m of middleware)
       this.middleware.push(m);
   }
@@ -42,7 +42,7 @@ export class Srvem {
    * with order, whenever the Srvem server recieves a request.
    * @param handlers Callback function that handles requests like a middleware.
    */
-  handle(...handlers: ((request: IncomingMessage, response: ServerResponse) => void)[]) {
+  handle(...handlers: ((request: SrvRequest, response: SrvResponse) => void)[]): void {
     for (const handler of handlers) {
       const m: SrvMiddleware = new (class M extends SrvMiddleware {
         main() {
@@ -59,7 +59,7 @@ export class Srvem {
    * You may call the `.listen()` function on the return value of this funtion.
    */
   start(): Server {
-    return this.server = createServer((request: IncomingMessage, response: ServerResponse): void => {
+    return this.server = createServer((request: SrvRequest, response: SrvResponse): void => {
       for (const m of this.middleware) {
         m.request = request
         m.response = response
