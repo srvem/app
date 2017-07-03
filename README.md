@@ -46,7 +46,7 @@ class Srvem {
   
 ## See Also
 - [@srvem/static](https://github.com/srvem/static) to serve static files from a specified directory.
-- [@srvem/router](https://github.com/srvem/router) to develop routers and server APIs.
+- [@srvem/router](https://github.com/srvem/router) to develop routers and server APIs with asynchronous request handlers.
 - [@srvem/middleware](https://github.com/srvem/static) to create your own custom middleware for Srvem apps.
   
 ## Credits
