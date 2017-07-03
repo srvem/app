@@ -42,6 +42,6 @@
     "typescript": "^2.4.1"
   },
   "dependencies": {
-    "@srvem/middleware": "^0.1.0"
+    "@srvem/middleware": "^0.2.1"
   }
 }
