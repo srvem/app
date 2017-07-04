@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "lib": ["ES2015"],
+    "lib": ["es2015"],
     "outDir": "build",
     "module": "commonjs",
     "moduleResolution": "node",
     "removeComments": true,
     "rootDir": "src",
-    "target": "es5",
+    "target": "es2017",
     "sourceMap": true
   },
   "exclude": [
