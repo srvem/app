@@ -110,7 +110,7 @@ export class SrvContext {
    * @param name Response header name
    * @param value Response header value
    */
-  setHeader(name: string, value: number | string | string[]): void {
+  setHeader(name: string, value: string | string[]): void {
     return this.response.setHeader(name, value)
   }
 
