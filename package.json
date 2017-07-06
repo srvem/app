@@ -40,14 +40,14 @@
   "author": "Kaleab S. Melkie <kaleabmelkie@gmail.com>",
   "license": "MIT",
   "engines": {
-    "node": ">=8.0.7 <9.0.0"
+    "node": ">=8.0.0"
   },
   "bugs": {
     "url": "https://github.com/srvem/app/issues"
   },
   "homepage": "https://github.com/srvem/app#readme",
   "devDependencies": {
-    "@types/node": "^8.0.8",
-    "typescript": "^2.4.1"
+    "@types/node": ">=8.0.8",
+    "typescript": ">=2.4.1"
   }
 }
