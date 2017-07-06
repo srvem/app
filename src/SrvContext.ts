@@ -1,7 +1,15 @@
 import { IncomingMessage, request, RequestOptions, ServerResponse, ServerResponseHeaders } from 'http'
 
 /**
- * TODO
+ * A context created when a request is received while listening on the server.
+ * All things related to the response are found in this.
+ * All things related to the request are found in this.request.
+ * This will be sent to middleware and handlers that Promise it's type back (after modification).
+ * Note: this.body is the response that will be written at the end.
+ *
+ * WARNING: If you are developing a middleware or a handler, do not loose the ctx: SrvContext.
+ * Without it, there will be no response for the request received by the server.
+ * Just remember to resolve your Promise.
  */
 export class SrvContext {
   /**
@@ -120,28 +128,20 @@ export class SrvContext {
    * 
    * @param milliseconds Timeout milliseconds
    */
-  setTimeout(milliseconds: number): Promise<void> {
-    return new Promise<void>(
-      (resolve: (value?: void | PromiseLike<void>) => void, reject: (reason?: any) => void): void => {
-        this.response.setTimeout(milliseconds, (): any => resolve())
-      })
+  setTimeout(milliseconds: number): Promise<SrvContext> {
+    return new Promise<SrvContext>((resolve: (value?: SrvContext | PromiseLike<SrvContext>) => void, reject: (reason?: any) => void): void => {
+      this.response.setTimeout(milliseconds, (): any => resolve(this))
+    })
   }
 
   /**
-   * Finishes the response by requesting and recieving the response from a new path.
-   * 
-   * @beta This feature has not been tested properly yet.
-   * 
-   * @param path New path
-   * @param method New request method
-   * @param statusCode Response status code
-   */
-  /**
+   * Finishes the response by requesting and receiving the response from a new path.
    *
-   * @param path
-   * @param statusCode
-   * @param requestOptions
-   * @returns {Promise<SrvContext>}
+   * @beta This feature has not been tested properly yet.
+   *
+   * @param path New path
+   * @param statusCode Response status code
+   * @param requestOptions Redirected request options
    */
   redirect(
     path: string,
@@ -157,7 +157,7 @@ export class SrvContext {
       request(requestOptions, (response: IncomingMessage): void => {
         response.on('error', (err: Error): void => reject(err))
 
-        let newBody: string = ''  
+        let newBody: string = ''
         response.on('data', (chunk: string | Buffer): void => {
           newBody += chunk
         })

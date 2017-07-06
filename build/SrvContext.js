@@ -46,7 +46,7 @@ class SrvContext {
     }
     setTimeout(milliseconds) {
         return new Promise((resolve, reject) => {
-            this.response.setTimeout(milliseconds, () => resolve());
+            this.response.setTimeout(milliseconds, () => resolve(this));
         });
     }
     redirect(path, statusCode = 301, requestOptions = {
