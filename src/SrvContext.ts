@@ -15,9 +15,9 @@ export class SrvContext {
   body: Buffer | string | any = null
 
   /**
-   * Construct a new SrvContext by passing in the native request and reponse objects.
+   * Construct a new SrvContext by passing in the native request and response objects.
    * 
-   * @param request Node.js' native Server resquest of type IncomingMessage from the 'http' module
+   * @param request Node.js' native Server request of type IncomingMessage from the 'http' module
    * @param response Node.js' native Server response of type ServerResponse from the 'http' module
    */
   constructor(public request: IncomingMessage, private response: ServerResponse) {}
@@ -135,6 +135,13 @@ export class SrvContext {
    * @param path New path
    * @param method New request method
    * @param statusCode Response status code
+   */
+  /**
+   *
+   * @param path
+   * @param statusCode
+   * @param requestOptions
+   * @returns {Promise<SrvContext>}
    */
   redirect(
     path: string,

@@ -26,7 +26,7 @@ import { SrvMiddlewareBlueprint } from './SrvMiddlewareBlueprint'
  */
 export class Srvem {
   private middleware: SrvMiddlewareBlueprint[] = []
-  private i: number = null; // a looper through the middlewares
+  private i: number = null; // used to loop through the this.middleware
 
   /**
    * The Server (null if not ready).
@@ -40,7 +40,7 @@ export class Srvem {
 
   /**
    * Adds middleware(s) to be executed, with order,
-   * whenever the Srvem server recieves a request.
+   * whenever the Srvem server receives a request.
    * @param middleware Srvem middleware(s)
    */
   use(...middleware: SrvMiddlewareBlueprint[]): void {
@@ -49,7 +49,7 @@ export class Srvem {
 
   /**
    * Adds request handler callback function(s), set to be executed,
-   * with order, whenever the Srvem server recieves a request.
+   * with order, whenever the Srvem server receives a request.
    * @param handlers Callback function that handles requests like a middleware.
    */
   handle(...handlers: ((ctx: SrvContext) => Promise<SrvContext>)[]): void {
@@ -63,7 +63,7 @@ export class Srvem {
 
   /**
    * Creates and returns a Server (using Node.js' built-in 'http'
-   * module) after loading all the middlewares and handlers.  
+   * module) after loading all the middleware and handlers.
    * You may call the `.listen()` function on the returned object.
    */
   ready(): Server {
