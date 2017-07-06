@@ -1,4 +1,4 @@
-import { IncomingMessage, request, RequestOptions, ServerResponse, ServerResponseHeaders } from 'http'
+import { IncomingMessage, request, RequestOptions, ServerResponse } from 'http'
 
 /**
  * A context created when a request is received while listening on the server.
@@ -75,7 +75,7 @@ export class SrvContext {
   /**
    * Get response headers.
    */
-  get getHeaders(): ServerResponseHeaders {
+  get getHeaders(): any {
     return this.response.getHeaders()
   }
 
@@ -110,7 +110,7 @@ export class SrvContext {
    * @param name Response header name
    * @param value Response header value
    */
-  setHeader(name: string, value: number | string | string[]): void {
+  setHeader(name: string, value: string | string[]): void {
     return this.response.setHeader(name, value)
   }
 
