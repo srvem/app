@@ -45,8 +45,5 @@
   "devDependencies": {
     "@types/node": "^8.0.7",
     "typescript": "^2.4.1"
-  },
-  "dependencies": {
-    "@srvem/middleware": "^0.2.2"
   }
 }
