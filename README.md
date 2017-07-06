@@ -47,7 +47,7 @@ class Srvem {
 - [@srvem/router](https://github.com/srvem/router) to develop routers and server APIs with asynchronous request handlers.
   
 ## Credits
-Kaleab S. Melkie (<kaleabmelkie@gmail.com>)
+Kaleab S. Melkie _<<kaleabmelkie@gmail.com>>_
   
 ## License
 MIT License  
