@@ -9,5 +9,5 @@ export abstract class SrvMiddlewareBlueprint {
    * 
    * @param ctx TODO
    */
-  abstract main(ctx: SrvContext): Promise<SrvContext>
+  abstract async main(ctx: SrvContext): Promise<SrvContext>
 }

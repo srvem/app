@@ -1,13 +1,13 @@
-import { IncomingMessage, ServerResponse } from 'http'
+import { IncomingMessage, request, RequestOptions, ServerResponse, ServerResponseHeaders } from 'http'
 
 /**
- * TODO: docs and example
+ * TODO
  */
 export class SrvContext {
   /**
    * The Date this context was created on.
    */
-  createdOn: number = Date.now()
+  readonly createdOn: number = Date.now()
 
   /**
    * Response body.
@@ -15,102 +15,67 @@ export class SrvContext {
   body: Buffer | string | any = null
 
   /**
-   * Response headers.
-   */
-  headers: any = this.nativeResponse.getHeaders()
-
-  /**
-   * Response status code.
-   */
-  statusCode: number = this.nativeResponse.statusCode
-
-  /**
-   * Response status message.
-   */
-  statusMessage: string = this.nativeResponse.statusMessage
-
-  /**
-   * Response default encoding (UTF-8 unless changed).
-   */
-  defaultEncoding: string = this.request.headers['encoder'].toString() || 'UTF-8' // todo use the proper request header name for encoding
-  
-  /**
-   * Send date on response?
-   */
-  sendDate: boolean = this.nativeResponse.sendDate
-
-  /**
    * Construct a new SrvContext by passing in the native request and reponse objects.
    * 
    * @param request Node.js' native Server resquest of type IncomingMessage from the 'http' module
    * @param response Node.js' native Server response of type ServerResponse from the 'http' module
    */
-  constructor(public request: IncomingMessage, private nativeResponse: ServerResponse) {}
+  constructor(public request: IncomingMessage, private response: ServerResponse) {}
 
   /**
-   * Set timeout on the response.
-   * 
-   * @param milliseconds Timeout milliseconds
+   * Get response status code.
    */
-  setTimeout(milliseconds: number): Promise<void> {
-    return new Promise<void>(
-      (resolve: (value?: void | PromiseLike<void>) => void, reject: (reason?: any) => void): void => {
-        this.nativeResponse.setTimeout(milliseconds, (): any => resolve())
-      })
+  get statusCode(): number {
+    return this.response.statusCode
   }
 
   /**
-   * Check if the response is finished.
+   * Set response status code.
    */
-  isFinished(): boolean {
-    return this.nativeResponse.finished
+  set statusCode(statusCode: number) {
+    this.response.statusCode = statusCode
   }
 
   /**
-   * Ends the response without writing the response body provided.
+   * Get response status message.
    */
-  terminate(): Promise<SrvContext> {
-    this._setResponsePropertiesBack()
-    return this._terminate()
-  }
-
-  private _terminate(): Promise<SrvContext> {
-    return new Promise<SrvContext>(
-      (resolve: (value?: SrvContext | PromiseLike<SrvContext>) => void, reject: (reason?: any) => void): void => {
-        this.nativeResponse.end((): any => {
-          this.nativeResponse.finished = true
-          resolve(this)
-        })
-      })
+  get statusMessage(): string {
+    return this.response.statusMessage
   }
 
   /**
-   * Ends the response after writing the response body.
+   * Set response status message.
    */
-  finish(): Promise<SrvContext> {
-    return new Promise<SrvContext>(
-      (resolve: (value?: SrvContext | PromiseLike<SrvContext>) => void, reject: (reason?: any) => void): void => {
-        if (this.isFinished())
-          throw new Error('Response is already finished.')
-        
-        this._setResponsePropertiesBack()
-        this._setHeadersBack()
-
-        this.nativeResponse.writeHead(this.statusCode, this.headers)
-        this.nativeResponse.write(this.body, this.defaultEncoding, (): any => resolve(this._terminate()))
-      })
+  set statusMessage(statusMessage: string) {
+    this.response.statusMessage = statusMessage
+  }
+  
+  /**
+   * Get: send date on response?
+   */
+  get sendDate(): boolean {
+    return this.response.sendDate
+  }
+  
+  /**
+   * Get: send date on response?
+   */
+  set sendDate(value: boolean) {
+    this.response.sendDate = value
   }
 
-  private _setResponsePropertiesBack(): void {
-    this.nativeResponse.statusCode = this.statusCode
-    this.nativeResponse.statusMessage = this.statusMessage
-    this.nativeResponse.setDefaultEncoding(this.defaultEncoding)
-    this.nativeResponse.sendDate = this.sendDate
+  /**
+   * Get response headers.
+   */
+  get getHeaders(): ServerResponseHeaders {
+    return this.response.getHeaders()
   }
 
-  private _setHeadersBack() {
-    for (const name in this.headers)
-      this.nativeResponse.setHeader(name, this.headers[name])
+  /**
+   * Returns all response header names.
+   */
+  get getHeaderNames(): string[] {
+    return this.response.getHeaderNames()
   }
 
   /**
@@ -119,19 +84,7 @@ export class SrvContext {
    * @param name Response header name
    */
   hasHeader(name: string): boolean {
-    return !!this.headers[name]
-  }
-
-  /**
-   * Returns all response header names.
-   */
-  getHeaderNames(): string[] {
-    const names: string[] = []
-    
-    for (const name in this.headers)
-      names.push(name)
-    
-    return names
+    return this.response.hasHeader(name)
   }
 
   /**
@@ -140,10 +93,7 @@ export class SrvContext {
    * @param name Response header name
    */
   getHeader(name: string): number | string | string[] {
-    if (this.hasHeader(name))
-      return this.headers[name]
-    else
-      return null
+    return this.response.getHeader(name)
   }
 
   /**
@@ -153,7 +103,7 @@ export class SrvContext {
    * @param value Response header value
    */
   setHeader(name: string, value: number | string | string[]): void {
-    this.headers[name] = value
+    return this.response.setHeader(name, value)
   }
 
   /**
@@ -161,10 +111,90 @@ export class SrvContext {
    * 
    * @param name Response header name
    */
-  removeHeader(name: string): boolean {
-    if (this.hasHeader(name))
-      return !!delete this.headers[name]
-    else
-      return false
+  removeHeader(name: string): void {
+    return this.response.removeHeader(name)
+  }
+
+  /**
+   * Set timeout on the response.
+   * 
+   * @param milliseconds Timeout milliseconds
+   */
+  setTimeout(milliseconds: number): Promise<void> {
+    return new Promise<void>(
+      (resolve: (value?: void | PromiseLike<void>) => void, reject: (reason?: any) => void): void => {
+        this.response.setTimeout(milliseconds, (): any => resolve())
+      })
+  }
+
+  /**
+   * Finishes the response by requesting and recieving the response from a new path.
+   * 
+   * @beta This feature has not been tested properly yet.
+   * 
+   * @param path New path
+   * @param method New request method
+   * @param statusCode Response status code
+   */
+  redirect(
+    path: string,
+    statusCode: number = 301,
+    requestOptions: RequestOptions = {
+      protocol: 'http:',
+      headers: this.response.getHeaders(),
+      method: this.request.method,
+      path: path
+    }
+  ): Promise<SrvContext> { // todo: test this, find its best implementation and remove the beta tag
+    return new Promise<SrvContext>((resolve: (value?: SrvContext | PromiseLike<SrvContext>) => void, reject: (reason?: any) => void): void => {
+      request(requestOptions, (response: IncomingMessage): void => {
+        response.on('error', (err: Error): void => reject(err))
+
+        let newBody: string = ''  
+        response.on('data', (chunk: string | Buffer): void => {
+          newBody += chunk
+        })
+
+        response.on('end', (): void => resolve(this.finish(newBody, statusCode)))
+      })
+    })
+  }
+
+  /**
+   * Check if the response is finished.
+   */
+  get isFinished(): boolean {
+    return this.response.finished
+  }
+
+  /**
+   * Ends the response after writing the response body.
+   */
+  finish(body?: any, statusCode?: number): Promise<SrvContext> {
+    return new Promise<SrvContext>((resolve: (value?: SrvContext | PromiseLike<SrvContext>) => void, reject: (reason?: any) => void): void => {
+      if (this.isFinished)
+        return reject('Response is already finished.')
+
+      if (body)
+        this.body = body;
+      
+      this.response.writeHead(this.statusCode, this.getHeaders)
+      this.response.write(this.body, (): any => resolve(this.terminate(statusCode)))
+    })
+  }
+
+  /**
+   * Ends the response without writing the response body provided.
+   */
+  terminate(statusCode?: number): Promise<SrvContext> {
+    return new Promise<SrvContext>((resolve: (value?: SrvContext | PromiseLike<SrvContext>) => void, reject: (reason?: any) => void): void => {
+      if (statusCode)
+        this.response.statusCode = statusCode
+      
+      this.response.end((): any => {
+        this.response.finished = true
+        resolve(this)
+      })
+    })
   }
 }

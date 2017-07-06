@@ -1,72 +1,93 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const http_1 = require("http");
 class SrvContext {
     constructor(request, response) {
         this.request = request;
         this.response = response;
+        this.createdOn = Date.now();
         this.body = null;
-        this.headers = this.response.getHeaders();
-        this.statusCode = this.response.statusCode;
-        this.statusMessage = this.response.statusMessage;
-        this.defaultEncoding = this.request.headers['encoder'].toString() || 'UTF-8';
-        this.sendDate = this.response.sendDate;
+    }
+    get statusCode() {
+        return this.response.statusCode;
+    }
+    set statusCode(statusCode) {
+        this.response.statusCode = statusCode;
+    }
+    get statusMessage() {
+        return this.response.statusMessage;
+    }
+    set statusMessage(statusMessage) {
+        this.response.statusMessage = statusMessage;
+    }
+    get sendDate() {
+        return this.response.sendDate;
+    }
+    set sendDate(value) {
+        this.response.sendDate = value;
+    }
+    get getHeaders() {
+        return this.response.getHeaders();
+    }
+    get getHeaderNames() {
+        return this.response.getHeaderNames();
+    }
+    hasHeader(name) {
+        return this.response.hasHeader(name);
+    }
+    getHeader(name) {
+        return this.response.getHeader(name);
+    }
+    setHeader(name, value) {
+        return this.response.setHeader(name, value);
+    }
+    removeHeader(name) {
+        return this.response.removeHeader(name);
     }
     setTimeout(milliseconds) {
         return new Promise((resolve, reject) => {
             this.response.setTimeout(milliseconds, () => resolve());
         });
     }
-    isFinished() {
+    redirect(path, statusCode = 301, requestOptions = {
+            protocol: 'http:',
+            headers: this.response.getHeaders(),
+            method: this.request.method,
+            path: path
+        }) {
+        return new Promise((resolve, reject) => {
+            http_1.request(requestOptions, (response) => {
+                response.on('error', (err) => reject(err));
+                let newBody = '';
+                response.on('data', (chunk) => {
+                    newBody += chunk;
+                });
+                response.on('end', () => resolve(this.finish(newBody, statusCode)));
+            });
+        });
+    }
+    get isFinished() {
         return this.response.finished;
     }
-    terminate() {
-        this._setResponsePropertiesBack();
-        return this._terminate();
-    }
-    _terminate() {
+    finish(body, statusCode) {
         return new Promise((resolve, reject) => {
-            this.response.end(() => resolve(this.response.finished = true));
+            if (this.isFinished)
+                return reject('Response is already finished.');
+            if (body)
+                this.body = body;
+            this.response.writeHead(this.statusCode, this.getHeaders);
+            this.response.write(this.body, () => resolve(this.terminate(statusCode)));
         });
     }
-    finish() {
+    terminate(statusCode) {
         return new Promise((resolve, reject) => {
-            if (this.isFinished())
-                throw new Error('Response is already finished.');
-            this._setResponsePropertiesBack();
-            this.response.addTrailers(this.headers);
-            this.response.writeHead(this.statusCode, this.headers);
-            this.response.write(this.body, this.defaultEncoding, () => resolve(this._terminate()));
+            if (statusCode)
+                this.response.statusCode = statusCode;
+            this.response.end(() => {
+                this.response.finished = true;
+                resolve(this);
+            });
         });
-    }
-    _setResponsePropertiesBack() {
-        this.response.statusCode = this.statusCode;
-        this.response.statusMessage = this.statusMessage;
-        this.response.setDefaultEncoding(this.defaultEncoding);
-        this.response.sendDate = this.sendDate;
-    }
-    hasHeader(name) {
-        return !!this.headers[name];
-    }
-    getHeaderNames() {
-        const names = [];
-        for (const name in this.headers)
-            names.push(name);
-        return names;
-    }
-    getHeader(name) {
-        if (this.hasHeader(name))
-            return this.headers[name];
-        else
-            return null;
-    }
-    setHeader(name, value) {
-        this.headers[name] = value;
-    }
-    removeHeader(name) {
-        if (this.hasHeader(name))
-            return !!delete this.headers[name];
-        else
-            return false;
     }
 }
 exports.SrvContext = SrvContext;

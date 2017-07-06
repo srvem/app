@@ -1,5 +1,4 @@
 import { SrvContext } from './SrvContext';
 export declare abstract class SrvMiddlewareBlueprint {
-    ctx: SrvContext;
-    abstract main(): void;
+    abstract main(ctx: SrvContext): Promise<SrvContext>;
 }

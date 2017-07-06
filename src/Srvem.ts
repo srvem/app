@@ -4,8 +4,8 @@ import { SrvContext } from './SrvContext'
 import { SrvMiddlewareBlueprint } from './SrvMiddlewareBlueprint'
 
 /**
- * `Srvem` (pronounced "serve 'em") is a super-fast and minimalist
- * middleware-oriented TypeScript server for Node.js.  
+ * `Srvem` (pronounced "serve 'em") is a super-fast and minimalist middleware-oriented
+ * and Promise-based asynchronous TypeScript server for Node.js.  
  *   
  * _Example:_
  * ```
@@ -26,7 +26,7 @@ import { SrvMiddlewareBlueprint } from './SrvMiddlewareBlueprint'
  */
 export class Srvem {
   private middleware: SrvMiddlewareBlueprint[] = []
-  private i: number = null; // a looper
+  private i: number = null; // a looper through the middlewares
 
   /**
    * The Server (null if not ready).
@@ -44,8 +44,7 @@ export class Srvem {
    * @param middleware Srvem middleware(s)
    */
   use(...middleware: SrvMiddlewareBlueprint[]): void {
-    for (const m of middleware)
-      this.middleware.push(m);
+    this.middleware.concat(middleware)
   }
 
   /**
@@ -53,16 +52,13 @@ export class Srvem {
    * with order, whenever the Srvem server recieves a request.
    * @param handlers Callback function that handles requests like a middleware.
    */
-  handle(...handlers: ((ctx: SrvContext) => void)[]): void {
-    for (const handler of handlers) {
-      const m: SrvMiddlewareBlueprint = new (class M extends SrvMiddlewareBlueprint {
-        main() {
-          return handler(this.ctx)
+  handle(...handlers: ((ctx: SrvContext) => Promise<SrvContext>)[]): void {
+    for (const handler of handlers)
+      this.middleware.push(new (class M extends SrvMiddlewareBlueprint {
+        async main(ctx: SrvContext): Promise<SrvContext> {
+          return handler(ctx)
         }
-      })()
-
-      this.middleware.push(m);
-    }
+      })())
   }
 
   /**
@@ -74,26 +70,38 @@ export class Srvem {
     return this.server = createServer((request: IncomingMessage, response: ServerResponse): void => {
       const ctx: SrvContext = new SrvContext(request, response)
 
-      this.i = -1;
       this._runNext(ctx)
-      .then((ctx: SrvContext): SrvContext | PromiseLike<SrvContext> => this.i = null)
+        .then((ctx: SrvContext): SrvContext | PromiseLike<SrvContext> => {
+          this.i = -1
+          return ctx
+        })
+        .catch((reason: any): never | PromiseLike<never> => {
+          console.error(`srvem middleware error: ${reason}`)
+          this.i = -1
+          return null
+        })
     })
   }
 
   private _runNext(ctx: SrvContext): Promise<SrvContext> {
-    return new Promise<SrvContext>(
-      (resolve: (value?: SrvContext | PromiseLike<SrvContext>) => void, reject: (reason?: any) => void): void => {
-        if (this.i === null)
-          return resolve(ctx)
-        
-        if (this.middleware[++this.i])
-          this.middleware[this.i].main(ctx)
+    return new Promise<SrvContext>((resolve: (value?: SrvContext | PromiseLike<SrvContext>) => void, reject: (reason?: any) => void): void => {
+      if (this.middleware[++this.i])
+        this.middleware[this.i].main(ctx)
           .then((newerCtx: SrvContext): SrvContext | PromiseLike<SrvContext> => this._runNext(newerCtx ? newerCtx : ctx))
-        else {
-          ctx.finish()
-          resolve(ctx)
-        }
-      }
-    )
+          .catch((reason: any): never | PromiseLike<never> => {
+            reject(reason)
+            return null
+          })
+      else
+        ctx.finish()
+          .then((lastCtx: SrvContext): SrvContext | PromiseLike<SrvContext> => {
+            resolve(lastCtx)
+            return lastCtx
+          })
+          .catch((reason: any): never | PromiseLike<never> => {
+            reject(reason)
+            return null
+          })
+    })
   }
 }

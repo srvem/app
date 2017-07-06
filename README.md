@@ -1,5 +1,6 @@
 # @srvem/app
-Srvem (pronounced "serve 'em") is a super-fast and minimalist middleware-oriented TypeScript server for Node.js. This is the core package of the framework.
+Srvem (pronounced "serve 'em") is a super-fast and minimalist middleware-oriented and Promise-based asynchronous TypeScript server for Node.js.  
+This is the core package of the framework.
   
 ## Installation
 > `npm install --save @srvem/app`
@@ -15,7 +16,7 @@ const app = new Srvem()
 // app.handle( handlerFuncion4 )
 // app.handle( handler5, handler6, handler7 ) // ...
 
-app.start().listen(80)
+app.ready().listen(80)
 
 ```
     
@@ -23,19 +24,18 @@ app.start().listen(80)
 ```typescript
 class Srvem {
 
-  // SrvMiddleware is from the '@srvem/middleware' module
-  // it is a blueprint (super and abstract class) for all other srvem middlewares
-  use(...middleware: SrvMiddleware[]): void
+  // SrvMiddlewareBlueprint is an abstract super class inherited by srvem middlewares
+  use(...middleware: SrvMiddlewareBlueprint[]): void
 
-  // handlers are middleware functions called when a request is recieved
-  handle(...handlers: ((request: SrvRequest, response: SrvResponse) => void)[]): void
+  // handlers are functions that can modify the context on request (just like middlewares)
+  handle(...handlers: ((ctx: SrvContext) => Promise<SrvContext>)[]): void
 
   // returns a Server from the built-in Node.js 'http' module
-  // the listen method can be called on Server
-  start(): Server
+  // the `.listen()` method can be called on this Server
+  ready(): Server
 
-  // Server from Node.js' 'http' module
-  // returns null if start() hasn't been called yet
+  // the return value of this.ready() is stored on this field (for an easier access)
+  // returns null if ready() hasn't been called yet
   server: Server
 
 }
@@ -45,7 +45,6 @@ class Srvem {
 ## See Also
 - [@srvem/static](https://github.com/srvem/static) to serve static files from a specified directory.
 - [@srvem/router](https://github.com/srvem/router) to develop routers and server APIs with asynchronous request handlers.
-- [@srvem/middleware](https://github.com/srvem/static) to create your own custom middleware for Srvem apps.
   
 ## Credits
 Kaleab S. Melkie (<kaleabmelkie@gmail.com>)
