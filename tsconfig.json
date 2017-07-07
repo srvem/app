@@ -5,7 +5,6 @@
     "outDir": "build",
     "module": "commonjs",
     "moduleResolution": "node",
-    "removeComments": true,
     "rootDir": "src",
     "target": "es2017",
     "sourceMap": true

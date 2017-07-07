@@ -1,17 +1,12 @@
 import { IncomingMessage, request, RequestOptions, ServerResponse, ServerResponseHeaders } from 'http'
 
 /**
- * A context created when a request is received while listening on the server.
- * All things related to the response are found in this.
- * All things related to the request are found in this.request.
- * This will be sent to middleware and handlers that Promise it's type back (after modification).
- * Note: this.body is the response that will be written at the end.
- *
- * WARNING: If you are developing a middleware or a handler, do not loose the ctx: SrvContext.
- * Without it, there will be no response for the request received by the server.
- * Just remember to resolve your Promise.
+ * A context created when a request is received by the server while listening.
+ * All things related to the request and response are found in `this`.
+ * The native http.Server request can be found at `this.request`.
+ * Middlewares and handlers modify this (especially `this.statusCode` and `this.body`).
  */
-export class SrvContext {
+export class Context {
   /**
    * The Date this context was created on.
    */
@@ -23,51 +18,55 @@ export class SrvContext {
   body: Buffer | string | any = null
 
   /**
-   * Construct a new SrvContext by passing in the native request and response objects.
+   * Request method.
+   */
+  get method(): string {
+    return this.request.method
+  }
+
+  /**
+   * Request url.
+   */
+  get url(): string {
+    return this.request.url
+  }
+
+  /**
+   * Construct a new Context from the native request and response objects.
    * 
-   * @param request Node.js' native Server request of type IncomingMessage from the 'http' module
-   * @param response Node.js' native Server response of type ServerResponse from the 'http' module
+   * @param request http.Server's request
+   * @param response http.Server's response
    */
   constructor(public request: IncomingMessage, private response: ServerResponse) {}
 
   /**
-   * Get response status code.
+   * Response status code.
    */
   get statusCode(): number {
     return this.response.statusCode
   }
-
-  /**
-   * Set response status code.
-   */
   set statusCode(statusCode: number) {
     this.response.statusCode = statusCode
   }
 
+  // todo check header ???
   /**
-   * Get response status message.
+   * Response status message.
    */
   get statusMessage(): string {
     return this.response.statusMessage
   }
-
-  /**
-   * Set response status message.
-   */
   set statusMessage(statusMessage: string) {
     this.response.statusMessage = statusMessage
   }
   
+  // todo check header ???
   /**
-   * Get: send date on response?
+   * Send date on response?
    */
   get sendDate(): boolean {
     return this.response.sendDate
   }
-  
-  /**
-   * Get: send date on response?
-   */
   set sendDate(value: boolean) {
     this.response.sendDate = value
   }
@@ -75,14 +74,14 @@ export class SrvContext {
   /**
    * Get response headers.
    */
-  get getHeaders(): ServerResponseHeaders {
+  get headers(): ServerResponseHeaders {
     return this.response.getHeaders()
   }
 
   /**
    * Returns all response header names.
    */
-  get getHeaderNames(): string[] {
+  get headerNames(): string[] {
     return this.response.getHeaderNames()
   }
 
@@ -124,12 +123,12 @@ export class SrvContext {
   }
 
   /**
-   * Set timeout on the response.
+   * Sets timeout on the response.
    * 
    * @param milliseconds Timeout milliseconds
    */
-  setTimeout(milliseconds: number): Promise<SrvContext> {
-    return new Promise<SrvContext>((resolve: (value?: SrvContext | PromiseLike<SrvContext>) => void, reject: (reason?: any) => void): void => {
+  async setTimeout(milliseconds: number): Promise<Context> {
+    return new Promise<Context>((resolve: (value?: Context | PromiseLike<Context>) => void, reject: (reason?: any) => void): void => {
       this.response.setTimeout(milliseconds, (): any => resolve(this))
     })
   }
@@ -137,13 +136,13 @@ export class SrvContext {
   /**
    * Finishes the response by requesting and receiving the response from a new path.
    *
-   * @beta This feature has not been tested properly yet.
+   * @beta This feature has not been properly tested yet.
    *
    * @param path New path
    * @param statusCode Response status code
    * @param requestOptions Redirected request options
    */
-  redirect(
+  async redirect(
     path: string,
     statusCode: number = 301,
     requestOptions: RequestOptions = {
@@ -152,8 +151,8 @@ export class SrvContext {
       method: this.request.method,
       path: path
     }
-  ): Promise<SrvContext> { // todo: test this, find its best implementation and remove the beta tag
-    return new Promise<SrvContext>((resolve: (value?: SrvContext | PromiseLike<SrvContext>) => void, reject: (reason?: any) => void): void => {
+  ): Promise<Context> { // todo: test this, find its best implementation and remove the beta tag
+    return new Promise<Context>((resolve: (value?: Context | PromiseLike<Context>) => void, reject: (reason?: any) => void): void => {
       request(requestOptions, (response: IncomingMessage): void => {
         response.on('error', (err: Error): void => reject(err))
 
@@ -168,27 +167,30 @@ export class SrvContext {
   }
 
   /**
-   * Check if the response is finished.
+   * Is the response finished?
    */
-  get isFinished(): boolean {
+  get finished(): boolean {
     return this.response.finished
   }
 
   /**
    * Ends the response after writing the response body.
+   * 
+   * @param body Overriding response body
+   * @param statusCode Overriding status code
    */
-  finish(body?: any, statusCode?: number): Promise<SrvContext> {
-    return new Promise<SrvContext>((resolve: (value?: SrvContext | PromiseLike<SrvContext>) => void, reject: (reason?: any) => void): void => {
+  finish(body?: any, statusCode?: number): Promise<Context> {
+    return new Promise<Context>((resolve: (value?: Context | PromiseLike<Context>) => void, reject: (reason?: any) => void): void => {
       if (body)
         this.body = body
       
       if (statusCode)
         this.statusCode = statusCode
 
-      if (this.isFinished)
-        return reject('Response is already finished.')
+      if (this.finished)
+        return reject(new Error('Response is already finished.'))
       
-      this.response.writeHead(this.statusCode, this.getHeaders)
+      this.response.writeHead(this.statusCode, this.headers)
 
       if (this.body)
         this.response.write(this.body, (): any => resolve(this.terminate()))
@@ -198,10 +200,12 @@ export class SrvContext {
   }
 
   /**
-   * Ends the response without writing the response body provided.
+   * Ends the response without writing the response body.
+   * 
+   * @param statusCode Overriding status code
    */
-  terminate(statusCode?: number): Promise<SrvContext> {
-    return new Promise<SrvContext>((resolve: (value?: SrvContext | PromiseLike<SrvContext>) => void, reject: (reason?: any) => void): void => {
+  terminate(statusCode?: number): Promise<Context> {
+    return new Promise<Context>((resolve: (value?: Context | PromiseLike<Context>) => void, reject: (reason?: any) => void): void => {
       if (statusCode)
         this.statusCode = statusCode
       
