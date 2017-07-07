@@ -1,5 +1,7 @@
 import { IncomingMessage, request, RequestOptions, ServerResponse, ServerResponseHeaders } from 'http'
 
+import { PromiseResolveType, PromiseRejectType } from './helpers'
+
 /**
  * A context created when a request is received by the server while listening.
  * All things related to the request and response are found in `this`.
@@ -128,7 +130,7 @@ export class Context {
    * @param milliseconds Timeout milliseconds
    */
   async setTimeout(milliseconds: number): Promise<Context> {
-    return new Promise<Context>((resolve: (value?: Context | PromiseLike<Context>) => void, reject: (reason?: any) => void): void => {
+    return new Promise<Context>((resolve: PromiseResolveType<Context>, reject: PromiseRejectType): void => {
       this.response.setTimeout(milliseconds, (): any => resolve(this))
     })
   }
@@ -152,7 +154,7 @@ export class Context {
       path: path
     }
   ): Promise<Context> { // todo: test this, find its best implementation and remove the beta tag
-    return new Promise<Context>((resolve: (value?: Context | PromiseLike<Context>) => void, reject: (reason?: any) => void): void => {
+    return new Promise<Context>((resolve: PromiseResolveType<Context>, reject: PromiseRejectType): void => {
       request(requestOptions, (response: IncomingMessage): void => {
         response.on('error', (err: Error): void => reject(err))
 
@@ -180,7 +182,7 @@ export class Context {
    * @param statusCode Overriding status code
    */
   finish(body?: any, statusCode?: number): Promise<Context> {
-    return new Promise<Context>((resolve: (value?: Context | PromiseLike<Context>) => void, reject: (reason?: any) => void): void => {
+    return new Promise<Context>((resolve: PromiseResolveType<Context>, reject: PromiseRejectType): void => {
       if (body)
         this.body = body
       
@@ -205,7 +207,7 @@ export class Context {
    * @param statusCode Overriding status code
    */
   terminate(statusCode?: number): Promise<Context> {
-    return new Promise<Context>((resolve: (value?: Context | PromiseLike<Context>) => void, reject: (reason?: any) => void): void => {
+    return new Promise<Context>((resolve: PromiseResolveType<Context>, reject: PromiseRejectType): void => {
       if (statusCode)
         this.statusCode = statusCode
       

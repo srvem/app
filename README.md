@@ -36,15 +36,34 @@ import * as http from 'http'
 
 
 /**
- * An abstarct super class Srvem middleware inherit.
+ * Used to create a Srvem app.
  */
-declare abstract class MiddlewareBlueprint {
+declare class Srvem {
   /**
-   * Where execution of the middleware begins.
-   *
-   * @param ctx The Context
+   * The Server.
    */
-  abstract main(ctx: Context): Promise<void>
+  readonly server: http.Server
+
+  /**
+   * Constructs a new Srvem application.
+   */
+  constructor()
+
+  /**
+   * Adds middleware to be executed, with order (including handlers),
+   * whenever the Srvem server receives a request.
+   *
+   * @param middleware Srvem middleware
+   */
+  use(...middleware: MiddlewareBlueprint[]): void
+  
+  /**
+   * Adds request handler callback function(s), set to be executed, with order
+   * (including middleware), whenever the Srvem server receives a request.
+   *
+   * @param handlers Callback function that handles requests like a middleware
+   */
+  handle(...handlers: ((ctx: Context) => Promise<void>)[]): void
 }
 
 
@@ -185,35 +204,28 @@ declare class Context {
 
 
 /**
- * Used to create a Srvem app.
+ * An abstarct super class Srvem middleware inherit.
  */
-declare class Srvem {
+declare abstract class MiddlewareBlueprint {
   /**
-   * The Server.
-   */
-  readonly server: http.Server
-
-  /**
-   * Constructs a new Srvem application.
-   */
-  constructor()
-
-  /**
-   * Adds middleware to be executed, with order (including handlers),
-   * whenever the Srvem server receives a request.
+   * Where execution of the middleware begins.
    *
-   * @param middleware Srvem middleware
+   * @param ctx The Context
    */
-  use(...middleware: MiddlewareBlueprint[]): void
-  
-  /**
-   * Adds request handler callback function(s), set to be executed, with order
-   * (including middleware), whenever the Srvem server receives a request.
-   *
-   * @param handlers Callback function that handles requests like a middleware
-   */
-  handle(...handlers: ((ctx: Context) => Promise<void>)[]): void
+  abstract main(ctx: Context): Promise<void>
 }
+
+
+
+/**
+ * Promise resolve type shortcut.
+ */
+declare type PromiseResolveType<T> = (value?: T | PromiseLike<T>) => void
+
+/**
+ * Promise reject type shortcut.
+ */
+declare type PromiseRejectType = (reason?: any) => void
 
 ```
   
