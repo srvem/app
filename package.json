@@ -1,6 +1,6 @@
 {
   "name": "@srvem/app",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Srvem (pronounced as \"serve 'em\") is a super-fast and minimalist asynchronous middleware-oriented TypeScript server framework for Node.js. This is the core package of Srvem (contains a class used to construct a Srvem app).",
   "main": "build/main.js",
   "typings": "build/main.d.ts",
