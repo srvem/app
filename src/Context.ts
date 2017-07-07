@@ -1,6 +1,6 @@
 import { IncomingMessage, request, RequestOptions, ServerResponse, ServerResponseHeaders } from 'http'
 
-import { PromiseResolveType, PromiseRejectType } from './helpers'
+import { PromiseRejectType, PromiseResolveType } from './helpers'
 
 /**
  * A context created when a request is received by the server while listening.

@@ -1,6 +1,6 @@
 # @srvem/app
 Srvem (pronounced as "serve 'em") is a super-fast and minimalist asynchronous middleware-oriented TypeScript server framework for Node.js.  
-This is the core package of Srvem (contains a class to used to construct a Srvem app).
+This is the core package of Srvem (contains a class used to construct a Srvem app).
   
 ## Installation
 > `npm install --save @srvem/app`
@@ -31,7 +31,7 @@ app.server.listen(3000)
   
 ## API
 ```typescript
-import * as http from 'http'
+import { IncomingMessage, RequestOptions, Server, ServerResponse, ServerResponseHeaders } http from 'http'
 
 
 
@@ -42,7 +42,7 @@ declare class Srvem {
   /**
    * The Server.
    */
-  readonly server: http.Server
+  readonly server: Server
 
   /**
    * Constructs a new Srvem application.
@@ -78,7 +78,7 @@ declare class Context {
   /**
    * http.Server's request
    */
-  request: http.IncomingMessage
+  request: IncomingMessage
 
   /**
    * The Date this context was created on.
@@ -106,7 +106,7 @@ declare class Context {
    * @param request http.Server's request
    * @param response http.Server's response
    */
-  constructor(request: http.IncomingMessage, response: http.ServerResponse)
+  constructor(request: IncomingMessage, response: ServerResponse)
 
   /**
    * Response status code.
