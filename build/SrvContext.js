@@ -71,18 +71,23 @@ class SrvContext {
     }
     finish(body, statusCode) {
         return new Promise((resolve, reject) => {
-            if (this.isFinished)
-                return reject('Response is already finished.');
             if (body)
                 this.body = body;
+            if (statusCode)
+                this.statusCode = statusCode;
+            if (this.isFinished)
+                return reject('Response is already finished.');
             this.response.writeHead(this.statusCode, this.getHeaders);
-            this.response.write(this.body, () => resolve(this.terminate(statusCode)));
+            if (this.body)
+                this.response.write(this.body, () => resolve(this.terminate()));
+            else
+                resolve(this.terminate());
         });
     }
     terminate(statusCode) {
         return new Promise((resolve, reject) => {
             if (statusCode)
-                this.response.statusCode = statusCode;
+                this.statusCode = statusCode;
             this.response.end(() => {
                 this.response.finished = true;
                 resolve(this);

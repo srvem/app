@@ -26,7 +26,7 @@ import { SrvMiddlewareBlueprint } from './SrvMiddlewareBlueprint'
  */
 export class Srvem {
   private middleware: SrvMiddlewareBlueprint[] = []
-  private i: number = null; // used to loop through the this.middleware
+  private i: number = -1; // used to loop through the this.middleware
 
   /**
    * The Server (null if not ready).
@@ -44,7 +44,7 @@ export class Srvem {
    * @param middleware Srvem middleware(s)
    */
   use(...middleware: SrvMiddlewareBlueprint[]): void {
-    this.middleware.concat(middleware)
+    this.middleware = this.middleware.concat(middleware)
   }
 
   /**
@@ -87,7 +87,10 @@ export class Srvem {
     return new Promise<SrvContext>((resolve: (value?: SrvContext | PromiseLike<SrvContext>) => void, reject: (reason?: any) => void): void => {
       if (this.middleware[++this.i])
         this.middleware[this.i].main(ctx)
-          .then((newerCtx: SrvContext): SrvContext | PromiseLike<SrvContext> => this._runNext(newerCtx ? newerCtx : ctx))
+          .then((newerCtx: SrvContext): SrvContext | PromiseLike<SrvContext> => {
+            resolve(this._runNext(newerCtx))
+            return newerCtx
+          })
           .catch((reason: any): never | PromiseLike<never> => {
             reject(reason)
             return null
@@ -101,7 +104,7 @@ export class Srvem {
           .catch((reason: any): never | PromiseLike<never> => {
             reject(reason)
             return null
-          })
+          })      
     })
   }
 }

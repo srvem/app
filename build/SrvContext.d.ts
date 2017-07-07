@@ -13,7 +13,7 @@ export declare class SrvContext {
     readonly getHeaderNames: string[];
     hasHeader(name: string): boolean;
     getHeader(name: string): number | string | string[];
-    setHeader(name: string, value: number | string | string[]): void;
+    setHeader(name: string, value: string | string[]): void;
     removeHeader(name: string): void;
     setTimeout(milliseconds: number): Promise<SrvContext>;
     redirect(path: string, statusCode?: number, requestOptions?: RequestOptions): Promise<SrvContext>;

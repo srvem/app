@@ -6,11 +6,11 @@ const SrvMiddlewareBlueprint_1 = require("./SrvMiddlewareBlueprint");
 class Srvem {
     constructor() {
         this.middleware = [];
-        this.i = null;
+        this.i = -1;
         this.server = null;
     }
     use(...middleware) {
-        this.middleware.concat(middleware);
+        this.middleware = this.middleware.concat(middleware);
     }
     handle(...handlers) {
         for (const handler of handlers)
@@ -39,7 +39,10 @@ class Srvem {
         return new Promise((resolve, reject) => {
             if (this.middleware[++this.i])
                 this.middleware[this.i].main(ctx)
-                    .then((newerCtx) => this._runNext(newerCtx ? newerCtx : ctx))
+                    .then((newerCtx) => {
+                    resolve(this._runNext(newerCtx));
+                    return newerCtx;
+                })
                     .catch((reason) => {
                     reject(reason);
                     return null;

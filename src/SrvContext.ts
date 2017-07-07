@@ -179,14 +179,21 @@ export class SrvContext {
    */
   finish(body?: any, statusCode?: number): Promise<SrvContext> {
     return new Promise<SrvContext>((resolve: (value?: SrvContext | PromiseLike<SrvContext>) => void, reject: (reason?: any) => void): void => {
+      if (body)
+        this.body = body
+      
+      if (statusCode)
+        this.statusCode = statusCode
+
       if (this.isFinished)
         return reject('Response is already finished.')
-
-      if (body)
-        this.body = body;
       
       this.response.writeHead(this.statusCode, this.getHeaders)
-      this.response.write(this.body, (): any => resolve(this.terminate(statusCode)))
+
+      if (this.body)
+        this.response.write(this.body, (): any => resolve(this.terminate()))
+      else
+        resolve(this.terminate())
     })
   }
 
@@ -196,7 +203,7 @@ export class SrvContext {
   terminate(statusCode?: number): Promise<SrvContext> {
     return new Promise<SrvContext>((resolve: (value?: SrvContext | PromiseLike<SrvContext>) => void, reject: (reason?: any) => void): void => {
       if (statusCode)
-        this.response.statusCode = statusCode
+        this.statusCode = statusCode
       
       this.response.end((): any => {
         this.response.finished = true
